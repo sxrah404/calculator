@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   desktop_window: ^0.4.2
+  glass_kit: ^4.0.2
 
 dev_dependencies:
   flutter_test:
