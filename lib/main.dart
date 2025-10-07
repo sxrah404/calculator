@@ -24,6 +24,7 @@ class _CalculatorAppState extends State<CalculatorApp> {
   String currentOperation = '';
   double firstNum = 0;
   bool shouldResetDisplay = false;
+  bool isDarkMode = false;
 
   void handleButtonPress(String buttonText) {
     setState(() {
@@ -145,23 +146,42 @@ class _CalculatorAppState extends State<CalculatorApp> {
     }
   }
 
+  void toggleTheme() {
+    setState(() {
+      isDarkMode = !isDarkMode;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(-0.6, -0.8),
-            radius: 1.5,
-            colors: [
-              Color.fromARGB(255, 227, 175, 255),
-              Color(0xFFFFB7E5),
-              Color(0xFFEA7AF4),
-              Color(0xFFD98DFB),
-              Color.fromARGB(255, 177, 151, 248),
-            ],
-            stops: [0.0, 0.25, 0.5, 0.75, 1.0],
-          ),
+          gradient: isDarkMode
+              ? RadialGradient(
+                  center: Alignment(-0.6, -0.8),
+                  radius: 1.5,
+                  colors: [
+                    Color.fromARGB(255, 4, 11, 26),
+                    Color.fromARGB(255, 10, 30, 64),
+                    Color.fromARGB(255, 26, 53, 112),
+                    Color.fromARGB(255, 46, 47, 127),
+                    Color.fromARGB(255, 91, 43, 155),
+                  ],
+                  stops: [0.0, 0.25, 0.5, 0.75, 1.0],
+                )
+              : RadialGradient(
+                  center: Alignment(-0.6, -0.8),
+                  radius: 1.5,
+                  colors: [
+                    Color.fromARGB(255, 227, 175, 255),
+                    Color.fromARGB(255, 248, 174, 221),
+                    Color.fromARGB(255, 231, 121, 241),
+                    Color.fromARGB(255, 211, 135, 246),
+                    Color.fromARGB(255, 177, 151, 248),
+                  ],
+                  stops: [0.0, 0.25, 0.5, 0.75, 1.0],
+                ),
         ),
         child: Center(
           child: GlassContainer.clearGlass(
@@ -177,17 +197,25 @@ class _CalculatorAppState extends State<CalculatorApp> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        Icons.wb_sunny_outlined,
-                        color: Colors.white,
-                        size: 32,
-                      ),
-                      Text(
-                        historyDisplay,
-                        style: TextStyle(
+                      GestureDetector(
+                        onTap: toggleTheme,
+                        child: Icon(
+                          isDarkMode
+                              ? Icons.dark_mode_rounded
+                              : Icons.light_mode_rounded,
                           color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w300,
+                          size: 32,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          historyDisplay,
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w300,
+                          ),
                         ),
                       ),
                     ],
@@ -197,12 +225,15 @@ class _CalculatorAppState extends State<CalculatorApp> {
                     child: Container(
                       alignment: Alignment.centerRight,
                       padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
-                        mainDisplay,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 72,
-                          fontWeight: FontWeight.w500,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          mainDisplay,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 72,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
@@ -214,26 +245,31 @@ class _CalculatorAppState extends State<CalculatorApp> {
                         CalculatorButtonRow(
                           buttons: ['⌫', 'AC', '%', '÷'],
                           onPressed: handleButtonPress,
+                          isDarkMode: isDarkMode,
                         ),
                         SizedBox(height: 12),
                         CalculatorButtonRow(
                           buttons: ['7', '8', '9', '×'],
                           onPressed: handleButtonPress,
+                          isDarkMode: isDarkMode,
                         ),
                         SizedBox(height: 12),
                         CalculatorButtonRow(
                           buttons: ['4', '5', '6', '-'],
                           onPressed: handleButtonPress,
+                          isDarkMode: isDarkMode,
                         ),
                         SizedBox(height: 12),
                         CalculatorButtonRow(
                           buttons: ['1', '2', '3', '+'],
                           onPressed: handleButtonPress,
+                          isDarkMode: isDarkMode,
                         ),
                         SizedBox(height: 12),
                         CalculatorButtonRow(
                           buttons: ['+/-', '0', '.', '='],
                           onPressed: handleButtonPress,
+                          isDarkMode: isDarkMode,
                         ),
                       ],
                     ),
@@ -251,11 +287,13 @@ class _CalculatorAppState extends State<CalculatorApp> {
 class CalculatorButtonRow extends StatelessWidget {
   final List<String> buttons;
   final void Function(String) onPressed;
+  final bool isDarkMode;
 
   const CalculatorButtonRow({
     super.key,
     required this.buttons,
     required this.onPressed,
+    required this.isDarkMode,
   });
 
   @override
@@ -276,6 +314,7 @@ class CalculatorButtonRow extends StatelessWidget {
                 text: button,
                 isAccent: isOperator,
                 onTap: () => onPressed(button),
+                isDarkMode: isDarkMode,
               ),
             ),
           );
@@ -289,12 +328,14 @@ class CalculatorButton extends StatelessWidget {
   final String text;
   final bool isAccent;
   final VoidCallback onTap;
+  final bool isDarkMode;
 
   const CalculatorButton({
     super.key,
     required this.text,
     required this.isAccent,
     required this.onTap,
+    required this.isDarkMode,
   });
 
   @override
@@ -303,7 +344,9 @@ class CalculatorButton extends StatelessWidget {
       return ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 230, 107, 241),
+          backgroundColor: isDarkMode
+              ? Color.fromARGB(255, 10, 30, 64)
+              : Color.fromARGB(255, 230, 107, 241),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
