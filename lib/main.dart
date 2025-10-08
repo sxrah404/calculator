@@ -85,6 +85,7 @@ class _CalculatorAppState extends State<CalculatorApp> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // light/dark mode toggle
                       GestureDetector(
                         onTap: widget.onToggleTheme,
                         child: Icon(
@@ -93,11 +94,12 @@ class _CalculatorAppState extends State<CalculatorApp> {
                               : Icons.light_mode_rounded,
                         ),
                       ),
+                      // history display
                       Expanded(
                         child: Text(
                           calculator.historyDisplay,
                           textAlign: TextAlign.right,
-                          style: textTheme.headlineMedium,
+                          style: textTheme.displaySmall,
                         ),
                       ),
                     ],
@@ -107,6 +109,7 @@ class _CalculatorAppState extends State<CalculatorApp> {
                     child: Container(
                       alignment: Alignment.centerRight,
                       padding: EdgeInsets.symmetric(horizontal: 20),
+                      // main display
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
@@ -118,6 +121,7 @@ class _CalculatorAppState extends State<CalculatorApp> {
                   ),
                   Expanded(
                     flex: 3,
+                    // the buttons
                     child: Column(
                       children: [
                         CalculatorButtonRow(
@@ -157,6 +161,7 @@ class _CalculatorAppState extends State<CalculatorApp> {
   }
 }
 
+// the button row
 class CalculatorButtonRow extends StatelessWidget {
   final List<String> buttons;
   final void Function(String) onPressed;
@@ -183,7 +188,7 @@ class CalculatorButtonRow extends StatelessWidget {
               ),
               child: CalculatorButton(
                 text: button,
-                isAccent: isOperator,
+                isAccent: isOperator, // operator buttons are accent colors
                 onTap: () => onPressed(button),
               ),
             ),
@@ -194,6 +199,7 @@ class CalculatorButtonRow extends StatelessWidget {
   }
 }
 
+// the buttons
 class CalculatorButton extends StatelessWidget {
   final String text;
   final bool isAccent;
@@ -226,6 +232,7 @@ class CalculatorButton extends StatelessWidget {
     } else {
       return Stack(
         children: [
+          // uses glass kit package for glassmorphism style
           GlassContainer.clearGlass(
             borderRadius: BorderRadius.circular(16),
             blur: 20,

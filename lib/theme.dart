@@ -1,3 +1,7 @@
+// this is all the theme stuff
+// light mode is a nice light pink gradient
+// dark mode is a dark moody blue gradient with a touch of purple
+
 import 'package:flutter/material.dart';
 
 ThemeData getCalculatorTheme(Brightness brightness) {
@@ -29,77 +33,67 @@ ThemeData getCalculatorTheme(Brightness brightness) {
           stops: [0.0, 0.25, 0.5, 0.75, 1.0],
         );
 
-  final accentColor = isDark
+  final accentColor =
+      isDark // for the accent buttons
       ? const Color.fromARGB(255, 10, 30, 64)
       : const Color.fromARGB(255, 230, 107, 241);
 
   return ThemeData(
     brightness: brightness,
-    
+
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: accentColor,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         padding: EdgeInsets.zero,
         elevation: 2,
       ),
     ),
 
     textTheme: const TextTheme(
+      // for the main display
       displayLarge: TextStyle(
         fontSize: 72,
         fontWeight: FontWeight.w500,
         color: Colors.white,
       ),
-      headlineMedium: TextStyle(
+      // for the history display
+      displaySmall: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w300,
         color: Colors.white,
       ),
+      // for the buttons
       bodyLarge: TextStyle(
         fontSize: 32,
         fontWeight: FontWeight.w400,
         color: Colors.white,
       ),
-      bodyMedium: TextStyle(
-        fontSize: 22,
-        fontWeight: FontWeight.w400,
-        color: Colors.white,
-      ),
     ),
 
-    iconTheme: const IconThemeData(
-      color: Colors.white,
-      size: 32,
-    ),
+    iconTheme: const IconThemeData(color: Colors.white, size: 32),
 
-    extensions: [
-      CalculatorGradients(
-        background: backgroundGradient,
-      ),
-    ],
+    extensions: [CalculatorGradients(background: backgroundGradient)],
   );
 }
 
+// needed to use ThemeExtension bc ThemeData doesn't have a property for gradients
 class CalculatorGradients extends ThemeExtension<CalculatorGradients> {
   final Gradient background;
 
-  const CalculatorGradients({
-    required this.background,
-  });
+  const CalculatorGradients({required this.background});
 
   @override
   CalculatorGradients copyWith({Gradient? background}) {
-    return CalculatorGradients(
-      background: background ?? this.background,
-    );
+    return CalculatorGradients(background: background ?? this.background);
   }
 
   @override
-  CalculatorGradients lerp(ThemeExtension<CalculatorGradients>? other, double t) {
+  CalculatorGradients lerp(
+    ThemeExtension<CalculatorGradients>? other,
+    double t,
+  ) {
     if (other is! CalculatorGradients) {
       return this;
     }

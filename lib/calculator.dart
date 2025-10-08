@@ -1,3 +1,5 @@
+// this is just all the calculator logic and all that jazz bc my main.dart got too messy
+
 class Calculator {
   String mainDisplay = '0';
   String historyDisplay = '';
