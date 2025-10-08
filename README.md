@@ -1,3 +1,3 @@
 # calculator
 
-A new Flutter project.
+CS 4393 Project 3
