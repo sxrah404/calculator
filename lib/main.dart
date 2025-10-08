@@ -2,187 +2,75 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:glass_kit/glass_kit.dart';
+import 'theme.dart';
+import 'calculator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await DesktopWindow.setWindowSize(const Size(500, 850));
   }
-  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: CalculatorApp()));
+  runApp(MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode themeMode = ThemeMode.light;
+
+  void toggleTheme() {
+    setState(() {
+      themeMode = themeMode == ThemeMode.light
+          ? ThemeMode.dark
+          : ThemeMode.light;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: getCalculatorTheme(Brightness.light),
+      darkTheme: getCalculatorTheme(Brightness.dark),
+      themeMode: themeMode,
+      home: CalculatorApp(onToggleTheme: toggleTheme),
+    );
+  }
 }
 
 class CalculatorApp extends StatefulWidget {
-  const CalculatorApp({super.key});
+  final VoidCallback onToggleTheme;
+
+  const CalculatorApp({super.key, required this.onToggleTheme});
 
   @override
   State<CalculatorApp> createState() => _CalculatorAppState();
 }
 
 class _CalculatorAppState extends State<CalculatorApp> {
-  String mainDisplay = '0';
-  String historyDisplay = '';
-  String currentOperation = '';
-  double firstNum = 0;
-  bool shouldResetDisplay = false;
-  bool isDarkMode = false;
+  final Calculator calculator = Calculator();
 
   void handleButtonPress(String buttonText) {
     setState(() {
-      switch (buttonText) {
-        case 'AC':
-          clearCalculator();
-          break;
-        case '⌫':
-          deleteLastCharacter();
-          break;
-        case '=':
-          calculateResult();
-          break;
-        case '÷':
-        case '×':
-        case '-':
-        case '+':
-        case '%':
-          handleOperator(buttonText);
-          break;
-        case '+/-':
-          toggleSign();
-          break;
-        default:
-          handleNum(buttonText);
-          break;
-      }
-    });
-  }
-
-  void clearCalculator() {
-    mainDisplay = '0';
-    historyDisplay = '';
-    currentOperation = '';
-    firstNum = 0;
-    shouldResetDisplay = false;
-  }
-
-  void deleteLastCharacter() {
-    if (mainDisplay.length > 1) {
-      mainDisplay = mainDisplay.substring(0, mainDisplay.length - 1);
-    } else {
-      mainDisplay = '0';
-    }
-  }
-
-  void handleNum(String value) {
-    if (shouldResetDisplay) {
-      mainDisplay = value;
-      shouldResetDisplay = false;
-    } else {
-      if (value == '.' && mainDisplay.contains('.')) return;
-      if (mainDisplay == '0' && value != '.') {
-        mainDisplay = value;
-      } else {
-        mainDisplay += value;
-      }
-    }
-  }
-
-  void handleOperator(String operator) {
-    firstNum = double.parse(mainDisplay);
-    currentOperation = operator;
-    historyDisplay = '$mainDisplay $operator';
-    shouldResetDisplay = true;
-  }
-
-  void toggleSign() {
-    if (mainDisplay == '0') return;
-    if (mainDisplay.startsWith('-')) {
-      mainDisplay = mainDisplay.substring(1);
-    } else {
-      mainDisplay = '-$mainDisplay';
-    }
-  }
-
-  void calculateResult() {
-    if (currentOperation.isEmpty) return;
-    double secondNum = double.parse(mainDisplay);
-    double result = 0;
-
-    switch (currentOperation) {
-      case '+':
-        result = firstNum + secondNum;
-        break;
-      case '-':
-        result = firstNum - secondNum;
-        break;
-      case '×':
-        result = firstNum * secondNum;
-        break;
-      case '÷':
-        if (secondNum != 0) {
-          result = firstNum / secondNum;
-        } else {
-          mainDisplay = 'Error';
-          historyDisplay = '';
-          currentOperation = '';
-          return;
-        }
-        break;
-      case '%':
-        result = firstNum % secondNum;
-        break;
-    }
-
-    historyDisplay =
-        '$firstNum $currentOperation $secondNum = ${formatResult(result)}';
-    mainDisplay = formatResult(result);
-    currentOperation = '';
-    shouldResetDisplay = true;
-  }
-
-  String formatResult(double result) {
-    if (result == result.toInt()) {
-      return result.toInt().toString();
-    } else {
-      return result.toStringAsFixed(8).replaceAll(RegExp(r'\.?0+$'), '');
-    }
-  }
-
-  void toggleTheme() {
-    setState(() {
-      isDarkMode = !isDarkMode;
+      calculator.handleButtonPress(buttonText);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final gradients = theme.extension<CalculatorGradients>()!;
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: isDarkMode
-              ? RadialGradient(
-                  center: Alignment(-0.6, -0.8),
-                  radius: 1.5,
-                  colors: [
-                    Color.fromARGB(255, 4, 11, 26),
-                    Color.fromARGB(255, 10, 30, 64),
-                    Color.fromARGB(255, 26, 53, 112),
-                    Color.fromARGB(255, 46, 47, 127),
-                    Color.fromARGB(255, 91, 43, 155),
-                  ],
-                  stops: [0.0, 0.25, 0.5, 0.75, 1.0],
-                )
-              : RadialGradient(
-                  center: Alignment(-0.6, -0.8),
-                  radius: 1.5,
-                  colors: [
-                    Color.fromARGB(255, 227, 175, 255),
-                    Color.fromARGB(255, 248, 174, 221),
-                    Color.fromARGB(255, 231, 121, 241),
-                    Color.fromARGB(255, 211, 135, 246),
-                    Color.fromARGB(255, 177, 151, 248),
-                  ],
-                  stops: [0.0, 0.25, 0.5, 0.75, 1.0],
-                ),
-        ),
+        decoration: BoxDecoration(gradient: gradients.background),
         child: Center(
           child: GlassContainer.clearGlass(
             width: 425,
@@ -198,24 +86,18 @@ class _CalculatorAppState extends State<CalculatorApp> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
-                        onTap: toggleTheme,
+                        onTap: widget.onToggleTheme,
                         child: Icon(
                           isDarkMode
                               ? Icons.dark_mode_rounded
                               : Icons.light_mode_rounded,
-                          color: Colors.white,
-                          size: 32,
                         ),
                       ),
                       Expanded(
                         child: Text(
-                          historyDisplay,
+                          calculator.historyDisplay,
                           textAlign: TextAlign.right,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w300,
-                          ),
+                          style: textTheme.headlineMedium,
                         ),
                       ),
                     ],
@@ -228,12 +110,8 @@ class _CalculatorAppState extends State<CalculatorApp> {
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
-                          mainDisplay,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 72,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          calculator.mainDisplay,
+                          style: textTheme.displayLarge,
                         ),
                       ),
                     ),
@@ -245,31 +123,26 @@ class _CalculatorAppState extends State<CalculatorApp> {
                         CalculatorButtonRow(
                           buttons: ['⌫', 'AC', '%', '÷'],
                           onPressed: handleButtonPress,
-                          isDarkMode: isDarkMode,
                         ),
                         SizedBox(height: 12),
                         CalculatorButtonRow(
                           buttons: ['7', '8', '9', '×'],
                           onPressed: handleButtonPress,
-                          isDarkMode: isDarkMode,
                         ),
                         SizedBox(height: 12),
                         CalculatorButtonRow(
                           buttons: ['4', '5', '6', '-'],
                           onPressed: handleButtonPress,
-                          isDarkMode: isDarkMode,
                         ),
                         SizedBox(height: 12),
                         CalculatorButtonRow(
                           buttons: ['1', '2', '3', '+'],
                           onPressed: handleButtonPress,
-                          isDarkMode: isDarkMode,
                         ),
                         SizedBox(height: 12),
                         CalculatorButtonRow(
                           buttons: ['+/-', '0', '.', '='],
                           onPressed: handleButtonPress,
-                          isDarkMode: isDarkMode,
                         ),
                       ],
                     ),
@@ -287,13 +160,11 @@ class _CalculatorAppState extends State<CalculatorApp> {
 class CalculatorButtonRow extends StatelessWidget {
   final List<String> buttons;
   final void Function(String) onPressed;
-  final bool isDarkMode;
 
   const CalculatorButtonRow({
     super.key,
     required this.buttons,
     required this.onPressed,
-    required this.isDarkMode,
   });
 
   @override
@@ -314,7 +185,6 @@ class CalculatorButtonRow extends StatelessWidget {
                 text: button,
                 isAccent: isOperator,
                 onTap: () => onPressed(button),
-                isDarkMode: isDarkMode,
               ),
             ),
           );
@@ -328,38 +198,27 @@ class CalculatorButton extends StatelessWidget {
   final String text;
   final bool isAccent;
   final VoidCallback onTap;
-  final bool isDarkMode;
 
   const CalculatorButton({
     super.key,
     required this.text,
     required this.isAccent,
     required this.onTap,
-    required this.isDarkMode,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     if (isAccent) {
       return ElevatedButton(
         onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isDarkMode
-              ? Color.fromARGB(255, 10, 30, 64)
-              : Color.fromARGB(255, 230, 107, 241),
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          padding: EdgeInsets.zero,
-          elevation: 2,
-        ),
         child: Center(
           child: Text(
             text,
-            style: TextStyle(
+            style: textTheme.bodyLarge?.copyWith(
               fontSize: text.length > 2 ? 22 : 32,
-              fontWeight: FontWeight.w400,
             ),
           ),
         ),
@@ -375,10 +234,8 @@ class CalculatorButton extends StatelessWidget {
             child: Center(
               child: Text(
                 text,
-                style: TextStyle(
-                  color: Colors.white,
+                style: textTheme.bodyLarge?.copyWith(
                   fontSize: text.length > 2 ? 22 : 32,
-                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),
