@@ -72,6 +72,7 @@ class _CalculatorAppState extends State<CalculatorApp> {
       body: Container(
         decoration: BoxDecoration(gradient: gradients.background),
         child: Center(
+          // glassmorphism moment
           child: GlassContainer.clearGlass(
             width: 425,
             height: 675,
@@ -232,7 +233,6 @@ class CalculatorButton extends StatelessWidget {
     } else {
       return Stack(
         children: [
-          // uses glass kit package for glassmorphism style
           GlassContainer.clearGlass(
             borderRadius: BorderRadius.circular(16),
             blur: 20,
